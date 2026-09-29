@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "bundleId": "2f2319cddd62c08cb9a1a615f2cb3043d6f0ff68960c2b294cfdb233e061c233",
+  "formats": {
+    "buildings": 3
+  },
+  "inputs": {
+    "data/dem_utm49n_2m.tif": {
+      "bytes": 45752731,
+      "sha256": "04e405f88a272148c370b0929d5a319a15b36588ae62e16f4193a7afbeda69c0"
+    },
+    "data/aeroway.geojson": {
+      "bytes": 29278,
+      "sha256": "8e6ffa1a7be2a084839ee1c9bfe90d7703c8d228e1ff90eb6b0ebf63fb0a5892"
+    },
+    "data/building_parts.geojson": {
+      "bytes": 10041,
+      "sha256": "83915678abb80dea18e13a194f400f7d058b12748bcb73325fefffabd39337d7"
+    },
+    "data/buildings.geojson": {
+      "bytes": 1719902,
+      "sha256": "3284eb1f5ca05ce35bdbb63505a0eb5e0e769fe2eaa832552c2d4b6d392f9cf9"
+    },
+    "data/emitters.geojson": {
+      "bytes": 8617,
+      "sha256": "dd92d6716b42e2619c03e0e2739be001545822f858d5fdffc9bca3abd93e6752"
+    },
+    "data/entrances.geojson": {
+      "bytes": 29152,
+      "sha256": "9ba1ba5ea7ab99fb3a22696173bef5fe5e4989b066bb2d06d57507284eb268ca"
+    },
+    "data/green.geojson": {
+      "bytes": 136121,
+      "sha256": "90b25b7cfcf17bc8b3bfac92e582d7e356b6d32827be7a59842c2f9787d856fa"
+    },
+    "data/industrial.geojson": {
+      "bytes": 48198,
+      "sha256": "810ac406eca3dae47bd6233afc04747fe49ab0d33be49be83d926a8748c8c7e2"
+    },
+    "data/infra.geojson": {
+      "bytes": 118103,
+      "sha256": "c3a6d4c2b22ce7ba37048eaf5125a226a766d14ffa2f1291f7f1642389d7d610"
+    },
+    "data/mine.geojson": {
+      "bytes": 11668,
+      "sha256": "c923f68f40971658d8a711afb2e15828dd424a9bf67a8a76535ed50e2ba17b1a"
+    },
+    "data/roads.geojson": {
+      "bytes": 680620,
+      "sha256": "646ddc0419f7799f6cd7edce65df875456787941ddbd015131d5e8cddc24e62e"
+    },
+    "data/water.geojson": {
+      "bytes": 164116,
+      "sha256": "8c25e6ab3d69f05e9732b2a4cafe79af37ff431a43f5ffc27c1ae4ce31aaaf84"
+    },
+    "data/osm_sources.json": {
+      "bytes": 4156,
+      "sha256": "1ec0eaf7903ecb43c8aace2cb47bb70fd6570b9652f949d87d4c3f80496c68eb"
+    },
+    "data/landmarks_osm.json": {
+      "bytes": 8501,
+      "sha256": "23e8711168c6cdad2279f2c3ddd4db928444f1030c6ad2d453b5b749fcd2631d"
+    },
+    "data/landmarks_sources.json": {
+      "bytes": 363,
+      "sha256": "e3a60896f548b2e747a5d891278de509dfba28ad27aaf576e87665aee60d46c5"
+    },
+    "data/register/register.json": {
+      "bytes": 35877,
+      "sha256": "29cb5fd65237628af9094c8031ebff44fe8cb66f8956bc577eb8b21a312894be"
+    },
+    "data/register/osm_join.json": {
+      "bytes": 42192,
+      "sha256": "b2f88cf75319329cbbdb2e2413a9b4b8d01f4e16244a83c952f6225ccbf06d7c"
+    },
+    "survey/measured_albedo.json": {
+      "bytes": 302849,
+      "sha256": "24572445319ed723ee11202bdfc502e72fba7403532d3daa4c907ed37ff641cc"
+    },
+    "survey/facades.json": {
+      "bytes": 4039,
+      "sha256": "22fef8b8bb46192eeb5eb0427c9a7231aa5374d81184652c957b5d64f2c44e44"
+    },
+    "survey/series.json": {
+      "bytes": 21322,
+      "sha256": "c91cf94c03477b97f102b66a9cd1f76f870e6ef367f9e05e1401ba909f731c76"
+    },
+    "requirements.txt": {
+      "bytes": 109,
+      "sha256": "eeca392743987e1914e4c7df0fb613850fba9b5f5de143b189538f2f90f31139"
+    },
+    "scripts/config.py": {
+      "bytes": 1383,
+      "sha256": "2c328d96630c9cabf97b2929251f7bed53a5fabafa7972767edc6241af098d50"
+    },
+    "scripts/build_terrain.py": {
+      "bytes": 5154,
+      "sha256": "b16605dc7a98bd6ffce2406579317a67e096c9f161d7e0e532f30513ee56cabc"
+    },
+    "scripts/build_scene.py": {
+      "bytes": 19668,
+      "sha256": "b29e1f6978115e2cbb3aef4d2db1bf9da17fba366a7d8a74c43864eba097f575"
+    },
+    "scripts/build_landmarks.py": {
+      "bytes": 28222,
+      "sha256": "970a92c037d3edbfbe3601220fb1e6558f691c179952e04ef8054778a9c61a8d"
+    },
+    "scripts/series_match.py": {
+      "bytes": 15180,
+      "sha256": "6fd1cf7399aafad7abc1a4cd2bf173adc6303c70db6cbc25b64d267631d59d79"
+    },
+    "scripts/build_real.py": {
+      "bytes": 123831,
+      "sha256": "079d9b7476968b5efca87704284920dc233352f683927b17220fee41d8ceb4d2"
+    }
+  },
+  "outputs": {
+    "meta.json": {
+      "bytes": 5324,
+      "sha256": "1408363f79b60b7b966c457cf043a1f6bb4002acd538940b2a3af17e403986d9"
+    },
+    "ground.bin": {
+      "bytes": 27574396,
+      "sha256": "0a751c6a4b8424c2f87d101720a10ea967d89325699f1978976a863283e31b8f"
+    },
+    "splat.bin": {
+      "bytes": 13787198,
+      "sha256": "bd77d760ca251acd74fb9e3c6df03618f4095f958cfc01a577dac57efcdd5873"
+    },
+    "ao.bin": {
+      "bytes": 13787198,
+      "sha256": "b4fd3b4a8271eaf094bb292063dad7424f2da3b0e95b0a991b67962a99fff4ae"
+    },
+    "buildings.bin": {
+      "bytes": 228624,
+      "sha256": "8e91734bba69b6499c2c48967fbc8b22823b02ec564fe4546ec35d2b55c2d522"
+    },
+    "buildings.json": {
+      "bytes": 12677290,
+      "sha256": "c00d1ecf9a0bf9dcbed389794b518b11096b32b91b4e7fb5f2d8bfbe6a70dcbb"
+    },
+    "roads.bin": {
+      "bytes": 2207361,
+      "sha256": "278e7f10fa871632e5808b65bca9ac67d9a689be528de001e22243c146df1482"
+    },
+    "trees.bin": {
+      "bytes": 5353891,
+      "sha256": "eb956d9d632c1458fea2ba071eb598aefbfff4162093e0bb609ba4d1aaa2a7cd"
+    },
+    "infra.bin": {
+      "bytes": 8910,
+      "sha256": "16c8b446d383f0126d95a8b29a1900a4bc4ddee2a6e38e7690a7b965282aa4e9"
+    },
+    "landmarks.json": {
+      "bytes": 33445,
+      "sha256": "806c09a12d1838f689ff18c8adc78f245e9d4ed4186f67cbc33e613497e77fbc"
+    }
+  }
+}

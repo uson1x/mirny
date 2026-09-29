@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Мирный — реалистичный</title>
+  <style>
+    :root {
+      --ink: #eef2f7; --dim: #9eabbd; --rule: rgba(255,255,255,.16);
+      /* The glass every piece of text sits on. Text-shadow alone was measured
+         unreadable on the 21 March rim frame (docs/assets/drive-rim.png):
+         snow at noon is brighter than the dim ink, so no shadow radius saves
+         it. A backdrop at .46 keeps the ink on a known dark ground over any
+         scene and is still see-through over the night town. */
+      --glass: rgba(9,13,20,.46);
+      --bar-h: 120px;                /* measured and rewritten by ui/panel.js */
+      --gut: 14px;
+    }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #090d14; }
+    canvas { display: block; touch-action: none; }
+    .hud {
+      position: fixed; z-index: 2; pointer-events: none;
+      font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--ink);
+      text-shadow: 0 1px 2px rgba(0,0,0,.85), 0 0 10px rgba(0,0,0,.5);
+      transition: opacity .25s;
+    }
+    .panel {
+      background: var(--glass); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 3px; padding: 7px 11px;
+      backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+    }
+    .panel:empty, .panel.blank { display: none; }
+    em { font-style: normal; color: var(--ink); }
+
+    /* Four corners, each a column that stacks whatever is in it — so a module
+       line added under the pit text, or the drive readout above the key
+       hints, pushes its neighbours instead of landing on them. The bottom two
+       sit on the bar's measured height, which is how the 1440×900 overlap of
+       the hint line with the stats line is gone for every width, not tuned
+       away for one. */
+    #tl, #tr, #bl, #br { display: flex; flex-direction: column; gap: 6px; }
+    #tl { top: var(--gut); left: var(--gut); max-width: min(460px, calc(58vw - 2 * var(--gut))); }
+    #tr { top: var(--gut); right: var(--gut); align-items: flex-end; text-align: right;
+          max-width: calc(42vw - 2 * var(--gut)); }
+    #bl { bottom: calc(var(--bar-h) + 12px + 10px); left: var(--gut);
+          max-width: calc(50vw - 2 * var(--gut)); }
+    #br { bottom: calc(var(--bar-h) + 12px + 10px); right: var(--gut); align-items: flex-end;
+          text-align: right; max-width: calc(50vw - 2 * var(--gut)); }
+
+    #place b { font-weight: 600; letter-spacing: .16em; }
+    #place span { color: var(--dim); }
+    #pit { color: var(--dim); margin-top: 4px; }
+    #building {
+      display: none; color: var(--dim); white-space: pre-wrap; text-transform: none;
+      letter-spacing: .035em;
+    }
+    #clock { color: var(--dim); }
+    #clock b { display: block; font-size: 20px; letter-spacing: .12em; color: var(--ink); }
+    #stats { color: var(--dim); display: none; }
+    body.loading #stats, body.dev #stats, body.failed #stats { display: block; }
+    #keys { color: var(--dim); }
+    #drive { color: var(--dim); display: none; }
+    #drive b { font-weight: 600; color: #ffd27a; }
+
+    /* The part of the HUD that takes input. Three rows: moments (the way in),
+       the calendar and clock, and the extras — photo and link, plus whatever
+       groups the feature modules add through ui.addGroup (weather, water,
+       sound): ~7 groups in all, which no single row holds at 1280 px. */
+    #bar {
+      /* Centred by margin, not left:50% + translate: with left at 50% the
+         shrink-to-fit width is capped at half the viewport, and the time row
+         wrapped at 1440 px with 500 px of screen to spare. */
+      bottom: 12px; left: 0; right: 0; margin: 0 auto; width: fit-content;
+      pointer-events: auto; display: flex; flex-direction: column; gap: 4px;
+      padding: 5px 8px; border-radius: 3px; max-width: calc(100vw - 2 * var(--gut));
+      box-sizing: border-box; background: rgba(10,14,20,.62);
+      backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+      border: 1px solid var(--rule); white-space: nowrap;
+    }
+    #bar .row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; row-gap: 4px; }
+    #bar .row + .row { border-top: 1px solid rgba(255,255,255,.08); padding-top: 4px; }
+    #bar .grp { display: flex; align-items: center; gap: 3px; padding: 0 10px; }
+    #bar .row > .grp + .grp { border-left: 1px solid var(--rule); }
+    #bar .lbl { color: var(--dim); font-size: 9px; margin-right: 4px; }
+    #bar button, #bar a.mo {
+      font: inherit; letter-spacing: .08em; text-transform: uppercase; text-decoration: none;
+      color: var(--dim); background: none; cursor: pointer; text-shadow: none;
+      border: 1px solid transparent; border-radius: 2px; padding: 3px 7px;
+    }
+    #bar button:hover, #bar a.mo:hover { color: var(--ink); border-color: var(--rule); }
+    #bar button.on, #bar a.mo.on { color: #0c1017; background: var(--ink); border-color: var(--ink); }
+    #bar a.mo { color: #e9dcc6; }
+    #bar #play, #bar #rate { border-color: var(--rule); min-width: 40px; text-align: center; }
+    #scrub { width: 170px; accent-color: #e6ebf2; cursor: pointer; }
+
+    #toast {
+      bottom: calc(var(--bar-h) + 12px + 10px); left: 50%; transform: translateX(-50%);
+      opacity: 0; text-align: center; max-width: calc(100vw - 4 * var(--gut));
+      white-space: normal; overflow-wrap: anywhere;
+    }
+    #toast.show { opacity: 1; }
+    #toast.sel { pointer-events: auto; user-select: text; text-transform: none; }
+
+    /* Photo mode: everything goes, one faint way back. A touch screen has no
+       H key, so the way back has to be a thing you can tap. */
+    body.clean .hud { opacity: 0; pointer-events: none !important; }
+    body.clean #toast.show { opacity: 1; }
+    #unhide {
+      position: fixed; z-index: 3; right: 10px; bottom: 10px; display: none;
+      font: 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--ink); cursor: pointer;
+      background: var(--glass); border: 1px solid var(--rule); border-radius: 2px;
+      padding: 6px 8px; opacity: .28; transition: opacity .3s;
+    }
+    #unhide:hover, #unhide:focus-visible { opacity: 1; }
+    body.clean #unhide { display: block; }
+
+    /* Phone portrait and anything narrower than the time row: the rows stop
+       wrapping and scroll sideways inside the bar instead, so the bar stays
+       three lines tall and the page itself never scrolls. */
+    @media (max-width: 700px) {
+      :root { --gut: 8px; }
+      .hud { font-size: 10px; letter-spacing: .05em; }
+      .panel { padding: 5px 8px; }
+      #place span { display: none; }
+      #tl { max-width: calc(60vw - 2 * var(--gut)); }
+      #tr { max-width: calc(40vw - 2 * var(--gut)); }
+      #clock b { font-size: 17px; }
+      #sunstate .nm, #sunstate .l2 { display: none; }
+      #keys { display: none; }
+      #bar { left: var(--gut); right: var(--gut); width: auto; max-width: none; bottom: var(--gut);
+             padding: 4px 4px; }
+      #bar .row { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto;
+                  scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      #bar .row::-webkit-scrollbar { display: none; }
+      /* The clock controls first: on a phone the play button is the one
+         control that must not be a swipe away. Separators go, since flex
+         order would put them on the wrong side of a moved group. */
+      #bar .grp { flex: none; padding: 0 6px; }
+      #bar .row > .grp + .grp { border-left: 0; }
+      #row-time > .grp:nth-child(2) { order: -1; }
+      #bar button, #bar a.mo { padding: 5px 7px; }
+      #scrub { width: 120px; }
+      #bl, #br, #toast { bottom: calc(var(--bar-h) + var(--gut) + 8px); }
+    }
+  </style>
+  <script type="module" crossorigin src="/mirny/assets/real-BlvTMrcU.js"></script>
+  <link rel="modulepreload" crossorigin href="/mirny/assets/sun-Bt5VUp3R.js">
+</head>
+<body class="loading">
+  <div class="hud" id="tl">
+    <div class="panel">
+      <div id="place"><b>Мирный</b> <span>· Якутия · 62.5347° с. ш. 113.9581° в. д.</span></div>
+      <div id="pit">загрузка…</div>
+    </div>
+    <div class="panel" id="building"></div>
+  </div>
+  <div class="hud" id="tr">
+    <div class="panel" id="clock"><b>--:--</b><span id="sunstate">&nbsp;</span></div>
+  </div>
+  <div class="hud" id="bl"><div class="panel" id="stats">загрузка…</div></div>
+  <div class="hud" id="br">
+    <div class="panel" id="drive">&nbsp;</div>
+    <div class="panel" id="keys">&nbsp;</div>
+  </div>
+  <div class="hud" id="bar">
+    <div class="row" id="row-moments">
+      <div class="grp"><span class="lbl">моменты</span><span id="moments"></span></div>
+    </div>
+    <div class="row" id="row-time">
+      <div class="grp"><span class="lbl">дата</span><span id="seasons"></span></div>
+      <div class="grp">
+        <span class="lbl">время</span>
+        <button id="play" title="пуск / стоп (пробел)">❙❙</button>
+        <input id="scrub" type="range" min="0" max="1439" step="1" value="630" aria-label="время суток">
+        <button id="rate" title="скорость часов">300×</button>
+      </div>
+      <div class="grp"><span id="marks"></span></div>
+    </div>
+    <div class="row" id="row-x">
+      <div class="grp" id="grp-frame">
+        <span class="lbl">кадр</span>
+        <button id="link" title="скопировать ссылку на этот вид (L)">ссылка</button>
+        <button id="snap" title="сохранить PNG с подписью (C)">снимок</button>
+        <button id="hide" title="скрыть интерфейс (H)">скрыть</button>
+      </div>
+    </div>
+  </div>
+  <div class="hud panel" id="toast"></div>
+  <button id="unhide" title="показать интерфейс (H)">интерфейс</button>
+</body>
+</html>
