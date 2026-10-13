@@ -62,6 +62,38 @@
     #keys { color: var(--dim); }
     #drive { color: var(--dim); display: none; }
     #drive b { font-weight: 600; color: #ffd27a; }
+    #drive-ai { max-width: 330px; color: var(--dim); }
+    #drive-ai[hidden], #bar button[hidden], #grp-ai[hidden], #ai-speed[hidden] { display: none; }
+    #ai-title { display: block; color: #ffd27a; font-weight: 600; }
+    #ai-detail { display: block; text-transform: none; letter-spacing: .02em; }
+    #ai-progress { display: block; width: 100%; height: 4px; margin-top: 7px;
+                   accent-color: #ffd27a; }
+    #ai-progress[hidden] { display: none; }
+    #fleet-panel { width: 340px; max-width: calc(100vw - 2 * var(--gut)); text-align: left; pointer-events: auto;
+                   max-height: calc(100dvh - var(--bar-h) - 130px); overflow: auto;
+                   text-transform: none; letter-spacing: .02em; }
+    #fleet-panel[hidden], #fleet-speed[hidden], #fleet-camera[hidden],
+    body.fleet-active #drive-ai { display: none; }
+    #fleet-panel b { color: #ffd27a; }
+    #fleet-summary { display: block; margin: 5px 0; }
+    #fleet-panel table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    #fleet-table-scroll { max-height: 178px; overflow: auto; }
+    #fleet-panel thead { position: sticky; top: 0; background: #17212b; }
+    #fleet-panel tr.selected { background: #294455; }
+    #fleet-panel td button { color: #ffd27a; font: inherit; background: none; border: 0; cursor: pointer; padding: 3px; }
+    #fleet-map { display: block; width: 100%; height: 170px; background: #0c141c80; border-radius: 3px; }
+    .fleet-map-bot { cursor: pointer; }
+    .fleet-map-bot:focus { outline: none; }
+    .fleet-map-bot:focus circle { stroke: white; }
+    .fleet-map-number { fill: #10202c; font: bold 7px sans-serif; pointer-events: none; }
+    .fleet-map-label { fill: #cadbe6; font: 10px sans-serif; }
+    #fleet-legend { display: flex; gap: 12px; color: var(--dim); font-size: 9px; margin: 4px 0; }
+    #fleet-legend span:first-child { color: #ffd27a; }
+    #fleet-legend span:last-child { color: #79d4f4; }
+    #fleet-panel th { color: var(--dim); font-weight: 400; }
+    #fleet-panel td, #fleet-panel th { padding: 2px 4px; text-align: right; }
+    #fleet-panel td:nth-child(2), #fleet-panel th:nth-child(2) { text-align: left; }
+    #fleet-panel small { display: block; color: var(--dim); margin-top: 6px; line-height: 1.4; }
 
     /* The part of the HUD that takes input. Three rows: moments (the way in),
        the calendar and clock, and the extras — photo and link, plus whatever
@@ -81,6 +113,7 @@
     #bar .row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; row-gap: 4px; }
     #bar .row + .row { border-top: 1px solid rgba(255,255,255,.08); padding-top: 4px; }
     #bar .grp { display: flex; align-items: center; gap: 3px; padding: 0 10px; }
+    #bar #grp-ai { max-width: 100%; box-sizing: border-box; flex-wrap: wrap; justify-content: center; row-gap: 4px; }
     #bar .row > .grp + .grp { border-left: 1px solid var(--rule); }
     #bar .lbl { color: var(--dim); font-size: 9px; margin-right: 4px; }
     #bar button, #bar a.mo {
@@ -89,6 +122,9 @@
       border: 1px solid transparent; border-radius: 2px; padding: 3px 7px;
     }
     #bar button:hover, #bar a.mo:hover { color: var(--ink); border-color: var(--rule); }
+    #bar button:disabled { cursor: wait; opacity: .6; }
+    #ai-speed, #fleet-speed, #fleet-camera { font: inherit; color: var(--ink); border: 1px solid var(--rule);
+                border-radius: 2px; background: #171d26; padding: 3px 5px; cursor: pointer; }
     #bar button.on, #bar a.mo.on { color: #0c1017; background: var(--ink); border-color: var(--ink); }
     #bar a.mo { color: #e9dcc6; }
     #bar #play, #bar #rate { border-color: var(--rule); min-width: 40px; text-align: center; }
@@ -138,6 +174,7 @@
          control that must not be a swipe away. Separators go, since flex
          order would put them on the wrong side of a moved group. */
       #bar .grp { flex: none; padding: 0 6px; }
+      #grp-ai { order: -1; }
       #bar .row > .grp + .grp { border-left: 0; }
       #row-time > .grp:nth-child(2) { order: -1; }
       #bar button, #bar a.mo { padding: 5px 7px; }
@@ -145,8 +182,8 @@
       #bl, #br, #toast { bottom: calc(var(--bar-h) + var(--gut) + 8px); }
     }
   </style>
-  <script type="module" crossorigin src="/mirny/assets/real-BlvTMrcU.js"></script>
-  <link rel="modulepreload" crossorigin href="/mirny/assets/sun-Bt5VUp3R.js">
+  <script type="module" crossorigin src="/mirny/assets/real-CIOcd9hS.js"></script>
+  <link rel="modulepreload" crossorigin href="/mirny/assets/sun-B0BG1esw.js">
 </head>
 <body class="loading">
   <div class="hud" id="tl">
@@ -161,12 +198,44 @@
   </div>
   <div class="hud" id="bl"><div class="panel" id="stats">загрузка…</div></div>
   <div class="hud" id="br">
+    <div class="panel" id="fleet-panel" hidden>
+      <b id="fleet-title">20 БелАЗов · непрерывные рейсы</b>
+      <span id="fleet-summary" role="status"></span>
+      <svg id="fleet-map" viewBox="0 0 300 170" role="group" aria-label="Машины на карте маршрута"></svg>
+      <div id="fleet-legend"><span>● пустой</span><span>● с рудой · номер — камера</span></div>
+      <div id="fleet-table-scroll">
+      <table aria-label="Нагрузка каждой машины">
+        <thead><tr><th>№</th><th>Этап</th><th>Рейс</th><th>Путь</th><th>мс/с</th></tr></thead>
+        <tbody id="fleet-rows"></tbody>
+      </table>
+      </div>
+      <small>мс работы бота за секунду: сеть + физика + поза. 10 мс/с ≈ 1% одного ядра; отрисовка отдельно. Машины пока не сталкиваются друг с другом.</small>
+    </div>
+    <div class="panel" id="drive-ai" hidden>
+      <b id="ai-title" role="status"></b>
+      <span id="ai-detail"></span>
+      <progress id="ai-progress" max="100" value="0" aria-label="Прогресс рейса AI"></progress>
+    </div>
     <div class="panel" id="drive">&nbsp;</div>
     <div class="panel" id="keys">&nbsp;</div>
   </div>
   <div class="hud" id="bar">
     <div class="row" id="row-moments">
       <div class="grp"><span class="lbl">моменты</span><span id="moments"></span></div>
+      <div class="grp" id="grp-ai">
+        <button id="ai-drive" aria-pressed="false" title="AI станет доступен после загрузки города" disabled>AI за рулём</button>
+        <button id="ai-restart" title="Начать рейс AI заново у въезда в карьер" hidden>заново</button>
+        <button id="ai-manual" title="Отключить AI и управлять машиной самому" hidden>за руль</button>
+        <select id="ai-speed" aria-label="Скорость рейса AI" title="Ускорение рейса AI" hidden>
+          <option value="1">1×</option><option value="4">4×</option><option value="10">10×</option>
+        </select>
+        <button id="fleet-start" aria-pressed="false" title="Двадцать PPO-водителей по всему маршруту" disabled>20 AI машин</button>
+        <button id="fleet-stop" hidden>убрать 20 AI</button>
+        <select id="fleet-speed" aria-label="Скорость машин" hidden>
+          <option value="1">1×</option><option value="4">4×</option><option value="10">10×</option>
+        </select>
+        <select id="fleet-camera" aria-label="Камера машин" hidden><option value="-1">Весь маршрут</option></select>
+      </div>
     </div>
     <div class="row" id="row-time">
       <div class="grp"><span class="lbl">дата</span><span id="seasons"></span></div>
